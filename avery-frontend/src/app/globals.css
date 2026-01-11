@@ -46,6 +46,25 @@ html {
   border-radius: 2px;
 }
 
+/* Avery custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.3);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.5);
+}
+
 /* Animation utilities */
 @layer utilities {
   .animate-slide-up {
@@ -74,5 +93,150 @@ html {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* ===== AVERY ORB ANIMATIONS ===== */
+
+/* Orbital ring rotation */
+@keyframes orbRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orbRotateReverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* Core orb pulsing glow */
+@keyframes orbPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+/* Particle floating animation */
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px) scale(1.2);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-5px) translateX(-5px) scale(0.8);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(5px) translateX(3px) scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+/* Processing burst particle animation */
+@keyframes particleBurst {
+  0% {
+    transform: rotate(var(--burst-angle, 0deg)) translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--burst-angle, 0deg)) translateX(80px) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Particle orbital path */
+@keyframes particleOrbit {
+  from {
+    transform: rotate(0deg) translateX(var(--orbit-radius, 50px)) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(var(--orbit-radius, 50px)) rotate(-360deg);
+  }
+}
+
+/* Ring tilt animation for attentive state */
+@keyframes ringTilt {
+  0%, 100% {
+    transform: rotateX(65deg) rotateZ(-45deg);
+  }
+  50% {
+    transform: rotateX(55deg) rotateZ(-40deg);
+  }
+}
+
+/* Awakening fade in */
+@keyframes awakenFade {
+  from {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Data flow toward center (for attentive state) */
+@keyframes dataFlowIn {
+  0% {
+    transform: translateX(var(--start-x, 0)) translateY(var(--start-y, 0)) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(0) translateY(0) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Color cycling for processing state */
+@keyframes colorCycle {
+  0%, 100% {
+    filter: hue-rotate(0deg);
+  }
+  33% {
+    filter: hue-rotate(45deg);
+  }
+  66% {
+    filter: hue-rotate(-30deg);
+  }
+}
+
+/* Subtle breathing effect */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Shimmer effect for highlights */
+@keyframes shimmer {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.2;
   }
 }

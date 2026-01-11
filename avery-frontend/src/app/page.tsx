@@ -1,79 +1,86 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { AveryOrb } from "@/components/AveryOrb";
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(false);
-
   return (
-    <main className="min-h-screen bg-gradient-to-b from-navy-900 via-navy-800 to-navy-950 text-white">
+    <main className="min-h-screen bg-avery-bg text-white relative overflow-hidden">
+      {/* Background gradient overlay */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse at 50% 30%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 40%),
+            radial-gradient(ellipse at 20% 90%, rgba(6, 182, 212, 0.06) 0%, transparent 40%)
+          `,
+        }}
+      />
+
       {/* Hero Section */}
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
-        {/* Logo/Icon */}
-        <div className="mb-8 animate-fade-in">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center shadow-2xl">
-            <svg
-              className="w-14 h-14 text-navy-900"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
-          </div>
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-12">
+        {/* Avery Orb */}
+        <div className="mb-6 animate-fade-in">
+          <AveryOrb state="attentive" size="medium" />
         </div>
 
         {/* Title */}
-        <h1 className="text-4xl font-bold text-center mb-4 animate-slide-up">
-          Welcome to <span className="text-gold-400">Avery</span>
+        <h1 className="text-4xl font-bold text-center mb-3 animate-slide-up">
+          <span className="text-avery-text-primary">Meet </span>
+          <span className="text-avery-cyan">Avery</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-navy-300 text-center text-lg mb-8 max-w-sm animate-slide-up">
-          Your guide to transitioning from Navy service to a rewarding cybersecurity career.
+        <p className="text-avery-text-secondary text-center text-lg mb-10 max-w-sm animate-slide-up">
+          Your AI career intelligence system for cybersecurity.
         </p>
 
         {/* Features */}
-        <div className="space-y-4 mb-12 w-full max-w-sm animate-slide-up">
-          <div className="flex items-center gap-4 bg-navy-800/50 rounded-xl p-4 backdrop-blur">
-            <div className="w-10 h-10 rounded-full bg-gold-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-gold-400 font-bold">1</span>
+        <div className="space-y-3 mb-10 w-full max-w-sm animate-slide-up">
+          <div className="flex items-center gap-4 bg-avery-bg-elevated/50 border border-avery-bg-hover rounded-xl p-4 backdrop-blur">
+            <div className="w-10 h-10 rounded-full bg-avery-cyan/10 flex items-center justify-center flex-shrink-0">
+              <span className="text-avery-cyan font-semibold">01</span>
             </div>
-            <p className="text-navy-200 text-sm">Tell us about your Navy experience</p>
+            <p className="text-avery-text-secondary text-sm">Share your military experience</p>
           </div>
-          
-          <div className="flex items-center gap-4 bg-navy-800/50 rounded-xl p-4 backdrop-blur">
-            <div className="w-10 h-10 rounded-full bg-gold-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-gold-400 font-bold">2</span>
+
+          <div className="flex items-center gap-4 bg-avery-bg-elevated/50 border border-avery-bg-hover rounded-xl p-4 backdrop-blur">
+            <div className="w-10 h-10 rounded-full bg-avery-purple/10 flex items-center justify-center flex-shrink-0">
+              <span className="text-avery-purple font-semibold">02</span>
             </div>
-            <p className="text-navy-200 text-sm">Take a quick personality assessment</p>
+            <p className="text-avery-text-secondary text-sm">Avery analyzes your profile</p>
           </div>
-          
-          <div className="flex items-center gap-4 bg-navy-800/50 rounded-xl p-4 backdrop-blur">
-            <div className="w-10 h-10 rounded-full bg-gold-500/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-gold-400 font-bold">3</span>
+
+          <div className="flex items-center gap-4 bg-avery-bg-elevated/50 border border-avery-bg-hover rounded-xl p-4 backdrop-blur">
+            <div className="w-10 h-10 rounded-full bg-avery-teal/10 flex items-center justify-center flex-shrink-0">
+              <span className="text-avery-teal font-semibold">03</span>
             </div>
-            <p className="text-navy-200 text-sm">Discover your top 3 cybersecurity roles</p>
+            <p className="text-avery-text-secondary text-sm">Get matched to high-paying roles</p>
           </div>
         </div>
 
         {/* CTA Button */}
         <Link
-          href="/onboarding"
-          className="w-full max-w-sm bg-gradient-to-r from-gold-400 to-gold-500 text-navy-900 font-semibold py-4 px-8 rounded-2xl text-center text-lg shadow-lg active:scale-[0.98] transition-transform"
+          href="/start"
+          className="w-full max-w-sm bg-gradient-to-r from-avery-cyan to-avery-teal text-black font-semibold
+                     py-4 px-8 rounded-2xl text-center text-lg shadow-glow-cyan
+                     hover:shadow-[0_0_40px_rgba(0,212,255,0.5)] active:scale-[0.98] transition-all duration-300"
         >
-          Get Started
+          Begin Session
+        </Link>
+
+        {/* Secondary link to old onboarding (for comparison) */}
+        <Link
+          href="/onboarding"
+          className="text-avery-text-muted text-xs mt-6 hover:text-avery-text-secondary transition-colors"
+        >
+          Use classic onboarding
         </Link>
 
         {/* Footer text */}
-        <p className="text-navy-500 text-xs mt-8 text-center">
-          Built for sailors, by those who understand service.
+        <p className="text-avery-text-muted text-xs mt-8 text-center">
+          Powered by career intelligence
         </p>
       </div>
     </main>
