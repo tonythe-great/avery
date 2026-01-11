@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,14 +7,17 @@ from app.routes import onboarding, assessment, results
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize database tables on startup."""
+    """Initialize database tables and seed data on startup."""
     from app.database import engine, Base
+    from app.seed_data import seed_database
+    
     try:
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully!")
+        # Auto-seed in production
+        seed_database()
     except Exception as e:
-        print(f"Warning: Could not connect to database: {e}")
-        print("Make sure PostgreSQL is running and the 'avery' database exists.")
+        print(f"Warning: Could not initialize database: {e}")
     yield
 
 
@@ -24,13 +28,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware for frontend
+# CORS middleware for frontend - allow Vercel and localhost
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://*.vercel.app",
+        os.getenv("FRONTEND_URL", "http://localhost:3000"),
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
