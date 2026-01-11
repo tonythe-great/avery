@@ -59,20 +59,20 @@ export const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
   }, [displayProgress, progress, isLoading, onAnalysisComplete]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
+    <div className="flex flex-col items-center min-h-screen min-h-[100dvh] px-4 py-6 safe-area-inset">
       {/* Avery Orb - Processing State */}
-      <div className="flex-1 flex items-center justify-center">
-        <AveryOrb state="processing" size="large" />
+      <div className="flex-shrink-0 mt-auto mb-6">
+        <AveryOrb state="processing" size="medium" />
       </div>
 
       {/* Status Text */}
-      <div className="text-center mb-8 min-h-[100px]">
-        <p className="text-lg text-avery-text-secondary mb-2">
+      <div className="text-center mb-6 min-h-[80px]">
+        <p className="text-base sm:text-lg text-avery-text-secondary mb-2">
           {veteranName ? `Analyzing ${veteranName}'s profile...` : 'Initializing analysis...'}
         </p>
 
         <p
-          className="text-avery-cyan font-medium transition-opacity duration-300"
+          className="text-avery-cyan font-medium transition-opacity duration-300 text-sm sm:text-base"
           key={currentMessageIndex}
         >
           {STATUS_MESSAGES[currentMessageIndex]}
@@ -80,7 +80,7 @@ export const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full max-w-sm mb-8">
+      <div className="w-full max-w-sm mb-6">
         <div className="flex justify-between text-sm text-avery-text-muted mb-2">
           <span>Processing</span>
           <span>{Math.round(displayProgress)}%</span>
@@ -97,7 +97,7 @@ export const AnalysisScreen: React.FC<AnalysisScreenProps> = ({
       </div>
 
       {/* Progress Dots */}
-      <ProgressDots total={4} current={3} className="mb-8" />
+      <ProgressDots total={4} current={3} className="mb-auto pb-4" />
     </div>
   );
 };

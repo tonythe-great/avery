@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 export type OrbState = 'dormant' | 'awakening' | 'attentive' | 'processing' | 'presenting';
 export type OrbSize = 'small' | 'medium' | 'large';
@@ -80,6 +80,10 @@ export const AveryOrb: React.FC<AveryOrbProps> = ({
   );
   const [isAwakening, setIsAwakening] = useState(false);
 
+  // Use ref for callback to avoid effect re-runs
+  const onAwakeningCompleteRef = useRef(onAwakeningComplete);
+  onAwakeningCompleteRef.current = onAwakeningComplete;
+
   const sizes = sizeConfig[size];
   const config = stateConfig[state];
   const particles = generateParticles(
@@ -101,7 +105,7 @@ export const AveryOrb: React.FC<AveryOrbProps> = ({
       // Callback when awakening complete
       const completeTimeout = setTimeout(() => {
         setIsAwakening(false);
-        onAwakeningComplete?.();
+        onAwakeningCompleteRef.current?.();
       }, 1500);
 
       return () => {
@@ -111,7 +115,7 @@ export const AveryOrb: React.FC<AveryOrbProps> = ({
     } else if (state !== 'awakening') {
       setCurrentOpacity(config.orbOpacity);
     }
-  }, [state, isAwakening, config.orbOpacity, onAwakeningComplete]);
+  }, [state, isAwakening, config.orbOpacity]);
 
   const ringAnimationDuration = config.ringSpeed > 0
     ? `${20 / config.ringSpeed}s`

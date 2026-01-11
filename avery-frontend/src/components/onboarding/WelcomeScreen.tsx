@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AveryOrb } from '@/components/AveryOrb';
 import { TypewriterText } from '@/components/ui/TypewriterText';
 import { GlowButton } from '@/components/ui/GlowButton';
@@ -25,34 +25,34 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onInitialize }) =>
     return () => clearTimeout(awakeningTimer);
   }, []);
 
-  const handleAwakeningComplete = () => {
+  const handleAwakeningComplete = useCallback(() => {
     setOrbState('attentive');
     setShowTitle(true);
-  };
+  }, []);
 
-  const handleTitleComplete = () => {
+  const handleTitleComplete = useCallback(() => {
     setShowSubtitle(true);
-  };
+  }, []);
 
-  const handleSubtitleComplete = () => {
+  const handleSubtitleComplete = useCallback(() => {
     setShowButton(true);
-  };
+  }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
-      {/* Avery Orb */}
-      <div className="flex-1 flex items-center justify-center">
+    <div className="flex flex-col items-center min-h-screen min-h-[100dvh] px-6 py-8 safe-area-inset">
+      {/* Avery Orb - responsive size */}
+      <div className="flex-shrink-0 mt-auto mb-6">
         <AveryOrb
           state={orbState}
-          size="large"
+          size="medium"
           onAwakeningComplete={handleAwakeningComplete}
         />
       </div>
 
       {/* Text Content */}
-      <div className="text-center mb-8 min-h-[120px] flex flex-col items-center justify-center">
+      <div className="text-center mb-6 min-h-[100px] flex flex-col items-center justify-center">
         {showTitle && (
-          <h1 className="text-4xl font-bold text-avery-text-primary mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold text-avery-text-primary mb-3">
             <TypewriterText
               text="I am Avery."
               speed={80}
@@ -63,7 +63,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onInitialize }) =>
         )}
 
         {showSubtitle && (
-          <p className="text-xl text-avery-text-secondary">
+          <p className="text-lg sm:text-xl text-avery-text-secondary">
             <TypewriterText
               text="Your career intelligence system."
               speed={40}
@@ -74,20 +74,21 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onInitialize }) =>
         )}
       </div>
 
-      {/* Initialize Button */}
-      <div className={`mb-8 transition-all duration-500 ${showButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      {/* Initialize Button - always visible area */}
+      <div className={`w-full max-w-xs mb-4 transition-all duration-500 ${showButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <GlowButton
           variant="primary"
           size="lg"
           onClick={onInitialize}
           disabled={!showButton}
+          className="w-full"
         >
           Initialize
         </GlowButton>
       </div>
 
       {/* Progress Dots */}
-      <ProgressDots total={4} current={1} className="mb-8" />
+      <ProgressDots total={4} current={1} className="mb-auto pb-4" />
     </div>
   );
 };

@@ -44,11 +44,11 @@ export const TypewriterText: React.FC<TypewriterTextProps> = ({
       }, speed);
 
       return () => clearTimeout(timeout);
-    } else {
+    } else if (!isComplete) {
       setIsComplete(true);
       onComplete?.();
     }
-  }, [displayedText, text, speed, hasStarted, onComplete]);
+  }, [displayedText, text, speed, hasStarted, isComplete, onComplete]);
 
   return (
     <span className={className}>

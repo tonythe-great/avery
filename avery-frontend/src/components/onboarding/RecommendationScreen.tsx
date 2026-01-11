@@ -118,9 +118,9 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
 
   if (!recommendation) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12">
-        <AveryOrb state="attentive" size="medium" />
-        <p className="text-avery-text-secondary mt-8">Loading recommendation...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen min-h-[100dvh] px-4 py-6 safe-area-inset">
+        <AveryOrb state="attentive" size="small" />
+        <p className="text-avery-text-secondary mt-6">Loading recommendation...</p>
       </div>
     );
   }
@@ -129,16 +129,16 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
   const salaryRange = SALARY_RANGES[roleName] || { min: 70000, max: 120000 };
 
   return (
-    <div className="flex flex-col min-h-screen px-6 py-8">
+    <div className="flex flex-col min-h-screen min-h-[100dvh] px-4 py-6 safe-area-inset">
       {/* Orb - small, top corner */}
-      <div className="flex justify-start mb-4">
+      <div className="flex justify-start mb-3">
         <AveryOrb state="presenting" size="small" />
       </div>
 
       {/* Intro Text */}
       {showIntro && (
-        <div className="mb-6">
-          <p className="text-lg text-avery-text-secondary">
+        <div className="mb-4">
+          <p className="text-base sm:text-lg text-avery-text-secondary">
             <TypewriterText
               text={`${veteranName}, based on your profile, I've identified your optimal career path.`}
               speed={30}
@@ -151,12 +151,12 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
       {/* Result Card */}
       <div
         className={`
-          flex-1 transition-all duration-700 ease-out
+          flex-1 transition-all duration-700 ease-out overflow-y-auto
           ${showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
         `}
       >
         <div
-          className="bg-avery-bg-elevated/80 backdrop-blur-sm rounded-2xl p-6
+          className="bg-avery-bg-elevated/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6
                      border border-avery-cyan/20 shadow-lg relative overflow-hidden"
         >
           {/* Gradient border effect */}
@@ -169,45 +169,45 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
           />
 
           {/* Rank Badge */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3">
             <span className="px-3 py-1 bg-avery-cyan/20 text-avery-cyan text-xs font-bold rounded-full uppercase tracking-wider">
               #1 Match
             </span>
           </div>
 
           {/* Role Title */}
-          <h2 className="text-3xl font-bold text-avery-text-primary mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-avery-text-primary mb-4">
             {roleName}
           </h2>
 
           {/* Confidence & Salary Row */}
-          <div className="flex items-center gap-6 mb-6">
+          <div className="flex items-center gap-4 sm:gap-6 mb-4">
             {/* Confidence Ring */}
-            <div className="flex flex-col items-center">
-              <ConfidenceRing percentage={recommendation.match_percentage} />
+            <div className="flex flex-col items-center flex-shrink-0">
+              <ConfidenceRing percentage={recommendation.match_percentage} size={80} />
               <span className="text-xs text-avery-text-muted mt-2 uppercase tracking-wider">
                 Confidence
               </span>
             </div>
 
             {/* Salary Range */}
-            <div className="flex-1">
-              <p className="text-2xl font-semibold text-avery-text-primary">
+            <div className="flex-1 min-w-0">
+              <p className="text-lg sm:text-2xl font-semibold text-avery-text-primary truncate">
                 {formatSalary(salaryRange.min)} — {formatSalary(salaryRange.max)}
               </p>
-              <p className="text-sm text-avery-text-muted">median salary range</p>
+              <p className="text-xs sm:text-sm text-avery-text-muted">median salary range</p>
             </div>
           </div>
 
           {/* Match Reasons */}
-          <div className="border-t border-avery-bg-hover pt-4">
-            <h3 className="text-sm font-semibold text-avery-text-muted uppercase tracking-wider mb-3">
+          <div className="border-t border-avery-bg-hover pt-3">
+            <h3 className="text-xs sm:text-sm font-semibold text-avery-text-muted uppercase tracking-wider mb-2">
               Why This Fits
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-1.5">
               {recommendation.match_reasons.slice(0, 3).map((reason, index) => (
-                <li key={index} className="flex items-start gap-2 text-avery-text-secondary">
-                  <span className="text-avery-cyan mt-0.5">&#10003;</span>
+                <li key={index} className="flex items-start gap-2 text-avery-text-secondary text-sm">
+                  <span className="text-avery-cyan mt-0.5 flex-shrink-0">&#10003;</span>
                   <span>{reason}</span>
                 </li>
               ))}
@@ -216,8 +216,8 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
         </div>
 
         {/* Role Description */}
-        <div className="mt-4 p-4 bg-avery-bg-subtle rounded-xl">
-          <p className="text-sm text-avery-text-muted leading-relaxed">
+        <div className="mt-3 p-3 bg-avery-bg-subtle rounded-xl">
+          <p className="text-xs sm:text-sm text-avery-text-muted leading-relaxed">
             {recommendation.role.description}
           </p>
         </div>
@@ -226,7 +226,7 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
       {/* Action Buttons */}
       <div
         className={`
-          space-y-3 mt-6 transition-all duration-500 delay-500
+          space-y-2 mt-4 flex-shrink-0 transition-all duration-500 delay-500
           ${showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
         `}
       >
@@ -250,7 +250,7 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
       </div>
 
       {/* Progress Dots */}
-      <ProgressDots total={4} current={4} className="mt-6 mb-4" />
+      <ProgressDots total={4} current={4} className="mt-4 pb-2" />
     </div>
   );
 };

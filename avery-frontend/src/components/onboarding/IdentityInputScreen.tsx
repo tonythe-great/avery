@@ -214,33 +214,33 @@ export const IdentityInputScreen: React.FC<IdentityInputScreenProps> = ({
   };
 
   return (
-    <div className="flex flex-col min-h-screen px-6 py-8">
-      {/* Orb - positioned at top */}
-      <div className="flex justify-center mb-8">
-        <AveryOrb state="attentive" size="medium" />
+    <div className="flex flex-col min-h-screen min-h-[100dvh] px-4 py-6 safe-area-inset">
+      {/* Orb - smaller on mobile */}
+      <div className="flex justify-center mb-4">
+        <AveryOrb state="attentive" size="small" />
       </div>
 
       {/* Question Card */}
       <div className="flex-1 flex flex-col max-w-md mx-auto w-full">
         <div
           className={`
-            bg-avery-bg-elevated/50 backdrop-blur-sm rounded-2xl p-6
+            bg-avery-bg-elevated/50 backdrop-blur-sm rounded-2xl p-4 sm:p-6
             border border-avery-bg-hover shadow-lg
             transition-all duration-300
             ${isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}
           `}
         >
           {/* Question */}
-          <h2 className="text-2xl font-semibold text-avery-text-primary mb-8 text-center">
+          <h2 className="text-xl sm:text-2xl font-semibold text-avery-text-primary mb-6 text-center">
             {stepConfig[currentStep].question}
           </h2>
 
           {/* Input Area */}
-          <div className="min-h-[200px]">{renderInput()}</div>
+          <div className="min-h-[180px]">{renderInput()}</div>
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex gap-4 mt-8">
+        <div className="flex gap-3 mt-6">
           <GlowButton variant="ghost" size="md" onClick={handlePrevious} className="flex-1">
             Back
           </GlowButton>
@@ -257,19 +257,21 @@ export const IdentityInputScreen: React.FC<IdentityInputScreenProps> = ({
         </div>
       </div>
 
-      {/* Progress Dots */}
-      <ProgressDots total={4} current={2} className="mt-8 mb-4" />
+      {/* Progress indicators */}
+      <div className="mt-auto pt-4">
+        <ProgressDots total={4} current={2} className="mb-3" />
 
-      {/* Sub-progress for identity steps */}
-      <div className="flex justify-center gap-2 mb-4">
-        {steps.map((step, i) => (
-          <div
-            key={step}
-            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-              i <= stepIndex ? 'bg-avery-purple' : 'bg-avery-bg-hover'
-            }`}
-          />
-        ))}
+        {/* Sub-progress for identity steps */}
+        <div className="flex justify-center gap-2 pb-2">
+          {steps.map((step, i) => (
+            <div
+              key={step}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                i <= stepIndex ? 'bg-avery-purple' : 'bg-avery-bg-hover'
+              }`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
