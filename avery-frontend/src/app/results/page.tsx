@@ -66,7 +66,7 @@ export default function ResultsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold mb-2">Couldn't Load Results</h2>
+          <h2 className="text-xl font-bold mb-2">Could Not Load Results</h2>
           <p className="text-navy-400 mb-6">{error}</p>
           <Link
             href="/assessment"
@@ -79,6 +79,12 @@ export default function ResultsPage() {
     );
   }
 
+  const getDisplayName = () => {
+    if (!veteranName) return "Your";
+    const firstName = veteranName.split(" ")[0];
+    return `${firstName}'s`;
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-navy-900 via-navy-800 to-navy-950 text-white px-6 py-8">
       {/* Header */}
@@ -89,7 +95,7 @@ export default function ResultsPage() {
           </svg>
         </div>
         <h1 className="text-2xl font-bold mb-2">
-          {veteranName ? `${veteranName.split(" ")[0]}'s` : "Your"} Top Matches
+          {getDisplayName()} Top Matches
         </h1>
         <p className="text-navy-400">
           Based on your personality and Navy experience
@@ -174,7 +180,7 @@ export default function ResultsPage() {
                       
                       {match.match_reasons.length > 0 && (
                         <div>
-                          <p className="text-xs text-navy-500 uppercase tracking-wide mb-2">Why you're a great fit:</p>
+                          <p className="text-xs text-navy-500 uppercase tracking-wide mb-2">Why you are a great fit:</p>
                           <div className="flex flex-wrap gap-2">
                             {match.match_reasons.map((reason, i) => (
                               <span

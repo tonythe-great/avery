@@ -87,8 +87,8 @@ export default function OnboardingPage() {
         {/* Step 1: Name */}
         {step === 1 && (
           <div className="animate-slide-up">
-            <h2 className="text-2xl font-bold mb-2">What's your name?</h2>
-            <p className="text-navy-400 mb-8">Let's get to know you.</p>
+            <h2 className="text-2xl font-bold mb-2">What is your name?</h2>
+            <p className="text-navy-400 mb-8">Let us get to know you.</p>
             
             <input
               type="text"
@@ -104,8 +104,8 @@ export default function OnboardingPage() {
         {/* Step 2: Email */}
         {step === 2 && (
           <div className="animate-slide-up">
-            <h2 className="text-2xl font-bold mb-2">What's your email?</h2>
-            <p className="text-navy-400 mb-8">We'll use this to save your results.</p>
+            <h2 className="text-2xl font-bold mb-2">What is your email?</h2>
+            <p className="text-navy-400 mb-8">We will use this to save your results.</p>
             
             <input
               type="email"
