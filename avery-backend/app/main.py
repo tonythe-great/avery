@@ -2,7 +2,7 @@ import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import onboarding, assessment, results
+from app.routes import onboarding, assessment, results, scct, roadmap
 
 
 @asynccontextmanager
@@ -10,12 +10,14 @@ async def lifespan(app: FastAPI):
     """Initialize database tables and seed data on startup."""
     from app.database import engine, Base
     from app.seed_data import seed_database
-    
+    from app.scct_seed_data import seed_scct_data
+
     try:
         Base.metadata.create_all(bind=engine)
         print("Database tables created successfully!")
         # Auto-seed in production
         seed_database()
+        seed_scct_data()
     except Exception as e:
         print(f"Warning: Could not initialize database: {e}")
     yield
@@ -47,6 +49,8 @@ app.add_middleware(
 app.include_router(onboarding.router, prefix="/api/v1", tags=["Onboarding"])
 app.include_router(assessment.router, prefix="/api/v1", tags=["Assessment"])
 app.include_router(results.router, prefix="/api/v1", tags=["Results"])
+app.include_router(scct.router, prefix="/api/v1", tags=["SCCT Assessment"])
+app.include_router(roadmap.router, prefix="/api/v1", tags=["Career Roadmap"])
 
 
 @app.get("/")

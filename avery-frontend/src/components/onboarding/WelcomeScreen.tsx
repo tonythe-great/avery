@@ -22,7 +22,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onInitialize }) =>
       setOrbState('awakening');
     }, 500);
 
-    return () => clearTimeout(awakeningTimer);
+    // Fallback: show content after 2.5 seconds regardless of callback
+    const fallbackTimer = setTimeout(() => {
+      setOrbState('attentive');
+      setShowTitle(true);
+    }, 2500);
+
+    return () => {
+      clearTimeout(awakeningTimer);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const handleAwakeningComplete = useCallback(() => {
