@@ -92,7 +92,7 @@ export default function RoadmapPage() {
     <main className="min-h-screen bg-avery-bg text-white">
       <BackgroundGradient />
 
-      <div className="relative z-10">
+      <div className="relative z-10 safe-area-inset">
         {/* Header */}
         <div className="px-6 pt-6 pb-4">
           <Link
@@ -204,7 +204,7 @@ export default function RoadmapPage() {
         </div>
 
         {/* Fixed Bottom Actions */}
-        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-avery-bg via-avery-bg to-transparent pt-8 pb-6 px-6">
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-avery-bg via-avery-bg to-transparent pt-8 pb-6 px-6" style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
           <div className="flex gap-3 max-w-lg mx-auto">
             <GlowButton
               variant="secondary"

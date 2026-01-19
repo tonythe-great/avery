@@ -224,7 +224,7 @@ export default function ResultsPage() {
     <main className="min-h-screen bg-avery-bg text-white relative">
       <BackgroundGradient />
 
-      <div className="relative z-10 px-6 py-8">
+      <div className="relative z-10 px-6 py-8 safe-area-inset">
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>

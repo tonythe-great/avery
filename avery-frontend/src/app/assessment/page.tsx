@@ -174,7 +174,7 @@ export default function AssessmentPage() {
     <main className="min-h-screen bg-avery-bg text-white relative">
       <BackgroundGradient />
 
-      <div className="relative z-10 min-h-screen flex flex-col px-6 py-6">
+      <div className="relative z-10 min-h-screen flex flex-col px-6 py-6 safe-area-inset">
         {/* Header with Orb */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -334,7 +334,7 @@ export default function AssessmentPage() {
             )}
 
             {/* Question dots navigation */}
-            <div className="flex justify-center gap-1.5 mt-6 flex-wrap">
+            <div className="flex justify-center gap-1 mt-6 flex-wrap">
               {questions.map((q, i) => (
                 <button
                   key={q.id}
@@ -345,17 +345,21 @@ export default function AssessmentPage() {
                       setIsTransitioning(false);
                     }, 200);
                   }}
-                  className={`
-                    w-2 h-2 rounded-full transition-all duration-300
-                    ${i === currentIndex
-                      ? "w-6 bg-avery-cyan shadow-glow-cyan"
-                      : answers.has(q.id)
-                        ? "bg-avery-cyan/50 hover:bg-avery-cyan/70"
-                        : "bg-avery-bg-hover hover:bg-avery-text-muted"
-                    }
-                  `}
+                  className="p-2 -m-1"
                   aria-label={`Go to question ${i + 1}`}
-                />
+                >
+                  <div
+                    className={`
+                      h-2 rounded-full transition-all duration-300
+                      ${i === currentIndex
+                        ? "w-6 bg-avery-cyan shadow-glow-cyan"
+                        : answers.has(q.id)
+                          ? "w-2 bg-avery-cyan/50"
+                          : "w-2 bg-avery-bg-hover"
+                      }
+                    `}
+                  />
+                </button>
               ))}
             </div>
           </div>
