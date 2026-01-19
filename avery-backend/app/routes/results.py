@@ -1,11 +1,35 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel
 from app.database import get_db
 from app.models.veteran import Veteran
 from app.models.assessment import AssessmentResponse, Question
-from app.models.cyber_role import RoleMatch
+from app.models.cyber_role import CyberRole, RoleMatch
+from app.models.scct import ConfidenceVector
 from app.services.matching import get_top_role_matches, calculate_trait_scores
+from app.agents.career_coach_agent import CareerCoachAgent
+
+
+# LLM Response Models
+class LLMRecommendation(BaseModel):
+    role_id: int
+    role_name: str
+    match_score: float
+    primary_reason: str
+    fit_factors: List[str]
+    concerns: List[str]
+    avery_quote: str
+
+
+class LLMResultsResponse(BaseModel):
+    avery_intro: str
+    recommendations: List[LLMRecommendation]
+    fallback_used: bool = False
+
+
+# Initialize the career coach agent
+career_coach = CareerCoachAgent()
 
 router = APIRouter()
 
@@ -83,3 +107,106 @@ def get_full_results(veteran_id: int, db: Session = Depends(get_db)):
         "top_matches": [m.model_dump() for m in all_matches[:3]],
         "all_matches": [m.model_dump() for m in all_matches],
     }
+
+
+@router.get("/results/{veteran_id}/llm", response_model=LLMResultsResponse)
+def get_llm_results(veteran_id: int, db: Session = Depends(get_db)):
+    """
+    Get LLM-powered career recommendations with Avery's voice.
+
+    This endpoint uses Claude to generate personalized recommendations
+    based on the veteran's profile and SCCT assessment results.
+    Falls back to algorithmic matching if LLM is unavailable.
+    """
+    # Verify veteran exists
+    veteran = db.query(Veteran).filter(Veteran.id == veteran_id).first()
+    if not veteran:
+        raise HTTPException(status_code=404, detail="Veteran not found")
+
+    # Get confidence vector (SCCT assessment must be completed)
+    vector = db.query(ConfidenceVector).filter(
+        ConfidenceVector.veteran_id == veteran_id
+    ).first()
+
+    if not vector:
+        raise HTTPException(
+            status_code=400,
+            detail="SCCT assessment not completed. Please complete the assessment first."
+        )
+
+    # Get all available cyber roles
+    roles = db.query(CyberRole).all()
+    if not roles:
+        raise HTTPException(status_code=500, detail="No cyber roles available")
+
+    # Prepare veteran profile dict
+    veteran_profile = {
+        "name": veteran.name,
+        "rank": veteran.rank,
+        "rating": veteran.rating,
+        "security_clearance": veteran.security_clearance,
+        "years_of_service": veteran.years_of_service,
+    }
+
+    # Prepare SCCT vector dict
+    scct_vector = {
+        "se_technical": vector.se_technical,
+        "se_stress": vector.se_stress,
+        "se_growth": vector.se_growth,
+        "se_social": vector.se_social,
+        "oe_salary_priority": vector.oe_salary_priority,
+        "oe_stability_priority": vector.oe_stability_priority,
+        "oe_meaning_priority": vector.oe_meaning_priority,
+        "goals_timeline": vector.goals_timeline,
+        "goals_level": vector.goals_level,
+        "barriers_financial": vector.barriers_financial,
+        "barriers_technical": vector.barriers_technical,
+        "barriers_direction": vector.barriers_direction,
+    }
+
+    # Prepare roles list
+    roles_list = [
+        {"id": r.id, "name": r.name, "description": r.description}
+        for r in roles
+    ]
+
+    # Try LLM-powered recommendations
+    llm_result = career_coach.analyze_and_recommend(
+        veteran=veteran_profile,
+        scct_vector=scct_vector,
+        roles=roles_list,
+    )
+
+    if llm_result:
+        # LLM succeeded - return LLM-generated recommendations
+        return LLMResultsResponse(
+            avery_intro=llm_result["avery_intro"],
+            recommendations=[
+                LLMRecommendation(**rec) for rec in llm_result["recommendations"]
+            ],
+            fallback_used=False,
+        )
+
+    # Fallback to algorithmic matching
+    algorithmic_matches = get_top_role_matches(db, veteran_id, top_n=3)
+
+    if not algorithmic_matches:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to generate recommendations. Please try again."
+        )
+
+    # Generate fallback recommendations
+    fallback_result = career_coach.generate_fallback_recommendations(
+        veteran=veteran_profile,
+        scct_vector=scct_vector,
+        role_matches=[m.model_dump() for m in algorithmic_matches],
+    )
+
+    return LLMResultsResponse(
+        avery_intro=fallback_result["avery_intro"],
+        recommendations=[
+            LLMRecommendation(**rec) for rec in fallback_result["recommendations"]
+        ],
+        fallback_used=True,
+    )

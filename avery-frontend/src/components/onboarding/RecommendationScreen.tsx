@@ -5,11 +5,11 @@ import { AveryOrb } from '@/components/AveryOrb';
 import { GlowButton } from '@/components/ui/GlowButton';
 import { ProgressDots } from '@/components/ui/ProgressDots';
 import { TypewriterText } from '@/components/ui/TypewriterText';
-import { RoleMatch } from '@/lib/api';
+import { LLMResultsResponse, LLMRecommendation } from '@/lib/api';
 
 interface RecommendationScreenProps {
   veteranName: string;
-  recommendation: RoleMatch | null;
+  llmResults: LLMResultsResponse | null;
   onSeeAllRoles: () => void;
   onStartAssessment: () => void;
 }
@@ -41,7 +41,7 @@ const ConfidenceRing: React.FC<{ percentage: number; size?: number }> = ({
   size = 100,
 }) => {
   const [animatedPercentage, setAnimatedPercentage] = useState(0);
-  const strokeWidth = 8;
+  const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (animatedPercentage / 100) * circumference;
@@ -90,8 +90,125 @@ const ConfidenceRing: React.FC<{ percentage: number; size?: number }> = ({
       </svg>
       {/* Percentage text */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-2xl font-bold text-avery-text-primary">
+        <span className="text-lg font-bold text-avery-text-primary">
           {Math.round(animatedPercentage)}%
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const RecommendationCard: React.FC<{
+  recommendation: LLMRecommendation;
+  rank: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+}> = ({ recommendation, rank, isExpanded, onToggle }) => {
+  const salaryRange = SALARY_RANGES[recommendation.role_name] || { min: 70000, max: 120000 };
+
+  return (
+    <div
+      className={`
+        bg-avery-bg-elevated/80 backdrop-blur-sm rounded-2xl p-4
+        border transition-all duration-300 cursor-pointer
+        ${rank === 1 ? 'border-avery-cyan/40' : 'border-avery-bg-hover'}
+      `}
+      onClick={onToggle}
+    >
+      {/* Header Row */}
+      <div className="flex items-center gap-3 mb-3">
+        {/* Rank Badge */}
+        <span
+          className={`
+            px-2 py-0.5 text-xs font-bold rounded-full uppercase tracking-wider
+            ${rank === 1 ? 'bg-avery-cyan/20 text-avery-cyan' : 'bg-avery-bg-hover text-avery-text-muted'}
+          `}
+        >
+          #{rank}
+        </span>
+
+        {/* Role Name */}
+        <h3 className="text-lg font-semibold text-avery-text-primary flex-1 truncate">
+          {recommendation.role_name}
+        </h3>
+
+        {/* Match Score Ring */}
+        <ConfidenceRing percentage={recommendation.match_score} size={50} />
+      </div>
+
+      {/* Primary Reason */}
+      <p className="text-sm text-avery-text-secondary mb-3">
+        {recommendation.primary_reason}
+      </p>
+
+      {/* Expandable Content */}
+      <div
+        className={`
+          overflow-hidden transition-all duration-300
+          ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+        `}
+      >
+        {/* Salary Range */}
+        <div className="mb-3">
+          <p className="text-sm text-avery-text-muted mb-1">Salary Range</p>
+          <p className="text-base font-semibold text-avery-text-primary">
+            {formatSalary(salaryRange.min)} — {formatSalary(salaryRange.max)}
+          </p>
+        </div>
+
+        {/* Fit Factors */}
+        {recommendation.fit_factors.length > 0 && (
+          <div className="mb-3">
+            <p className="text-xs font-semibold text-avery-text-muted uppercase tracking-wider mb-2">
+              Why You Fit
+            </p>
+            <ul className="space-y-1">
+              {recommendation.fit_factors.map((factor, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm text-avery-text-secondary">
+                  <span className="text-avery-cyan mt-0.5 flex-shrink-0">&#10003;</span>
+                  <span>{factor}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Concerns */}
+        {recommendation.concerns.length > 0 && (
+          <div className="mb-3">
+            <p className="text-xs font-semibold text-avery-text-muted uppercase tracking-wider mb-2">
+              Considerations
+            </p>
+            <ul className="space-y-1">
+              {recommendation.concerns.map((concern, index) => (
+                <li key={index} className="flex items-start gap-2 text-sm text-avery-text-secondary">
+                  <span className="text-amber-500 mt-0.5 flex-shrink-0">!</span>
+                  <span>{concern}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Avery Quote */}
+        {recommendation.avery_quote && (
+          <div className="pt-3 border-t border-avery-bg-hover">
+            <p className="text-sm italic text-avery-text-muted">
+              &ldquo;{recommendation.avery_quote}&rdquo;
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Expand/Collapse Indicator */}
+      <div className="flex justify-center mt-2">
+        <span
+          className={`
+            text-avery-text-muted text-xs transition-transform duration-300
+            ${isExpanded ? 'rotate-180' : ''}
+          `}
+        >
+          &#9660;
         </span>
       </div>
     </div>
@@ -100,33 +217,30 @@ const ConfidenceRing: React.FC<{ percentage: number; size?: number }> = ({
 
 export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
   veteranName,
-  recommendation,
+  llmResults,
   onSeeAllRoles,
   onStartAssessment,
 }) => {
-  const [showCard, setShowCard] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
+  const [showCards, setShowCards] = useState(false);
+  const [expandedIndex, setExpandedIndex] = useState<number>(0);
 
   useEffect(() => {
-    // Show intro text, then reveal card
+    // Show cards after intro text
     const cardTimer = setTimeout(() => {
-      setShowCard(true);
+      setShowCards(true);
     }, 2000);
 
     return () => clearTimeout(cardTimer);
   }, []);
 
-  if (!recommendation) {
+  if (!llmResults) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen min-h-[100dvh] px-4 py-6 safe-area-inset">
         <AveryOrb state="attentive" size="small" />
-        <p className="text-avery-text-secondary mt-6">Loading recommendation...</p>
+        <p className="text-avery-text-secondary mt-6">Loading recommendations...</p>
       </div>
     );
   }
-
-  const roleName = recommendation.role.name;
-  const salaryRange = SALARY_RANGES[roleName] || { min: 70000, max: 120000 };
 
   return (
     <div className="flex flex-col min-h-screen min-h-[100dvh] px-4 py-6 safe-area-inset">
@@ -135,99 +249,40 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
         <AveryOrb state="presenting" size="small" />
       </div>
 
-      {/* Intro Text */}
-      {showIntro && (
-        <div className="mb-4">
-          <p className="text-base sm:text-lg text-avery-text-secondary">
-            <TypewriterText
-              text={`${veteranName}, based on your profile, I've identified your optimal career path.`}
-              speed={30}
-              cursor={false}
-            />
-          </p>
-        </div>
-      )}
+      {/* Avery's Intro */}
+      <div className="mb-4">
+        <p className="text-base sm:text-lg text-avery-text-secondary">
+          <TypewriterText
+            text={llmResults.avery_intro}
+            speed={30}
+            cursor={false}
+          />
+        </p>
+      </div>
 
-      {/* Result Card */}
+      {/* Recommendation Cards */}
       <div
         className={`
-          flex-1 transition-all duration-700 ease-out overflow-y-auto
-          ${showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
+          flex-1 space-y-3 overflow-y-auto transition-all duration-700 ease-out
+          ${showCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
         `}
       >
-        <div
-          className="bg-avery-bg-elevated/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6
-                     border border-avery-cyan/20 shadow-lg relative overflow-hidden"
-        >
-          {/* Gradient border effect */}
-          <div
-            className="absolute inset-0 rounded-2xl opacity-30"
-            style={{
-              background: 'linear-gradient(135deg, rgba(0,212,255,0.2) 0%, rgba(124,58,237,0.2) 50%, rgba(6,182,212,0.2) 100%)',
-              padding: '1px',
-            }}
+        {llmResults.recommendations.map((rec, index) => (
+          <RecommendationCard
+            key={rec.role_id}
+            recommendation={rec}
+            rank={index + 1}
+            isExpanded={expandedIndex === index}
+            onToggle={() => setExpandedIndex(expandedIndex === index ? -1 : index)}
           />
-
-          {/* Rank Badge */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="px-3 py-1 bg-avery-cyan/20 text-avery-cyan text-xs font-bold rounded-full uppercase tracking-wider">
-              #1 Match
-            </span>
-          </div>
-
-          {/* Role Title */}
-          <h2 className="text-2xl sm:text-3xl font-bold text-avery-text-primary mb-4">
-            {roleName}
-          </h2>
-
-          {/* Confidence & Salary Row */}
-          <div className="flex items-center gap-4 sm:gap-6 mb-4">
-            {/* Confidence Ring */}
-            <div className="flex flex-col items-center flex-shrink-0">
-              <ConfidenceRing percentage={recommendation.match_percentage} size={80} />
-              <span className="text-xs text-avery-text-muted mt-2 uppercase tracking-wider">
-                Confidence
-              </span>
-            </div>
-
-            {/* Salary Range */}
-            <div className="flex-1 min-w-0">
-              <p className="text-lg sm:text-2xl font-semibold text-avery-text-primary truncate">
-                {formatSalary(salaryRange.min)} — {formatSalary(salaryRange.max)}
-              </p>
-              <p className="text-xs sm:text-sm text-avery-text-muted">median salary range</p>
-            </div>
-          </div>
-
-          {/* Match Reasons */}
-          <div className="border-t border-avery-bg-hover pt-3">
-            <h3 className="text-xs sm:text-sm font-semibold text-avery-text-muted uppercase tracking-wider mb-2">
-              Why This Fits
-            </h3>
-            <ul className="space-y-1.5">
-              {recommendation.match_reasons.slice(0, 3).map((reason, index) => (
-                <li key={index} className="flex items-start gap-2 text-avery-text-secondary text-sm">
-                  <span className="text-avery-cyan mt-0.5 flex-shrink-0">&#10003;</span>
-                  <span>{reason}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Role Description */}
-        <div className="mt-3 p-3 bg-avery-bg-subtle rounded-xl">
-          <p className="text-xs sm:text-sm text-avery-text-muted leading-relaxed">
-            {recommendation.role.description}
-          </p>
-        </div>
+        ))}
       </div>
 
       {/* Action Buttons */}
       <div
         className={`
           space-y-2 mt-4 flex-shrink-0 transition-all duration-500 delay-500
-          ${showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+          ${showCards ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
         `}
       >
         <GlowButton
@@ -236,7 +291,7 @@ export const RecommendationScreen: React.FC<RecommendationScreenProps> = ({
           onClick={onStartAssessment}
           className="w-full"
         >
-          Take Full Assessment
+          Explore Top Match
         </GlowButton>
 
         <GlowButton

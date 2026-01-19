@@ -24,6 +24,7 @@ def start_onboarding(veteran_data: VeteranOnboardingStart, db: Session = Depends
         branch=veteran_data.branch,
         rank=veteran_data.rank,
         rating=veteran_data.rating,
+        security_clearance=veteran_data.security_clearance,
         years_of_service=veteran_data.years_of_service,
     )
     db.add(veteran)

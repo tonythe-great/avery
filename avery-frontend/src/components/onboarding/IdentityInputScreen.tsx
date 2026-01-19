@@ -24,12 +24,31 @@ const NAVY_RANKS = [
   'O-6 Captain',
 ];
 
+const NAVY_RATES = [
+  'IT - Information Systems Technician',
+  'CTN - Cryptologic Technician Networks',
+  'CTR - Cryptologic Technician Collection',
+  'CTI - Cryptologic Technician Interpretive',
+  'IS - Intelligence Specialist',
+  'ET - Electronics Technician',
+  'FC - Fire Controlman',
+  'OS - Operations Specialist',
+  'Other',
+];
+
+const SECURITY_CLEARANCES = [
+  { value: 'none', label: 'No Active Clearance' },
+  { value: 'secret', label: 'Secret' },
+  { value: 'top_secret', label: 'Top Secret' },
+  { value: 'ts_sci', label: 'TS/SCI' },
+];
+
 interface IdentityInputScreenProps {
   onComplete: (data: VeteranInput) => void;
   onBack: () => void;
 }
 
-type InputStep = 'name' | 'email' | 'rank' | 'years';
+type InputStep = 'name' | 'email' | 'rank' | 'rate' | 'clearance' | 'years';
 
 const stepConfig = {
   name: {
@@ -46,6 +65,16 @@ const stepConfig = {
     question: 'Your highest rank achieved?',
     placeholder: '',
     type: 'select' as const,
+  },
+  rate: {
+    question: 'What was your rate?',
+    placeholder: '',
+    type: 'rate_select' as const,
+  },
+  clearance: {
+    question: 'Current security clearance?',
+    placeholder: '',
+    type: 'clearance_select' as const,
   },
   years: {
     question: 'Years of service?',
@@ -66,11 +95,12 @@ export const IdentityInputScreen: React.FC<IdentityInputScreenProps> = ({
     branch: 'Navy',
     rank: '',
     rating: '',
+    security_clearance: '',
     years_of_service: 4,
   });
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const steps: InputStep[] = ['name', 'email', 'rank', 'years'];
+  const steps: InputStep[] = ['name', 'email', 'rank', 'rate', 'clearance', 'years'];
   const stepIndex = steps.indexOf(currentStep);
 
   useEffect(() => {
@@ -88,6 +118,10 @@ export const IdentityInputScreen: React.FC<IdentityInputScreenProps> = ({
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
       case 'rank':
         return formData.rank.length > 0;
+      case 'rate':
+        return (formData.rating?.length ?? 0) > 0;
+      case 'clearance':
+        return (formData.security_clearance?.length ?? 0) > 0;
       case 'years':
         return formData.years_of_service > 0;
       default:
@@ -170,6 +204,48 @@ export const IdentityInputScreen: React.FC<IdentityInputScreenProps> = ({
                 }`}
               >
                 {rank}
+              </button>
+            ))}
+          </div>
+        );
+
+      case 'rate_select':
+        return (
+          <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+            {NAVY_RATES.map((rate) => (
+              <button
+                key={rate}
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, rating: rate }));
+                }}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-300 ${
+                  formData.rating === rate
+                    ? 'bg-avery-cyan/20 border border-avery-cyan text-avery-text-primary shadow-glow-cyan'
+                    : 'bg-avery-bg-elevated border border-transparent text-avery-text-secondary hover:bg-avery-bg-hover hover:text-avery-text-primary'
+                }`}
+              >
+                {rate}
+              </button>
+            ))}
+          </div>
+        );
+
+      case 'clearance_select':
+        return (
+          <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+            {SECURITY_CLEARANCES.map((clearance) => (
+              <button
+                key={clearance.value}
+                onClick={() => {
+                  setFormData((prev) => ({ ...prev, security_clearance: clearance.value }));
+                }}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-300 ${
+                  formData.security_clearance === clearance.value
+                    ? 'bg-avery-cyan/20 border border-avery-cyan text-avery-text-primary shadow-glow-cyan'
+                    : 'bg-avery-bg-elevated border border-transparent text-avery-text-secondary hover:bg-avery-bg-hover hover:text-avery-text-primary'
+                }`}
+              >
+                {clearance.label}
               </button>
             ))}
           </div>

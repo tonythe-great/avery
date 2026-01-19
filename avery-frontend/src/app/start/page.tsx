@@ -5,12 +5,13 @@ import { useRouter } from 'next/navigation';
 import {
   WelcomeScreen,
   IdentityInputScreen,
+  SCCTQuestionScreen,
   AnalysisScreen,
   RecommendationScreen,
 } from '@/components/onboarding';
-import { createVeteran, getResults, VeteranInput, RoleMatch } from '@/lib/api';
+import { createVeteran, getLLMResults, VeteranInput, LLMResultsResponse } from '@/lib/api';
 
-type OnboardingStep = 'welcome' | 'identity' | 'analysis' | 'recommendation';
+type OnboardingStep = 'welcome' | 'identity' | 'scct' | 'analysis' | 'recommendation';
 
 export default function StartPage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function StartPage() {
   const [veteranData, setVeteranData] = useState<VeteranInput | null>(null);
   const [veteranId, setVeteranId] = useState<number | null>(null);
   const [veteranName, setVeteranName] = useState<string>('');
-  const [recommendation, setRecommendation] = useState<RoleMatch | null>(null);
+  const [llmResults, setLLMResults] = useState<LLMResultsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -28,10 +29,31 @@ export default function StartPage() {
     setCurrentStep('identity');
   }, []);
 
-  // Handle identity completion - create profile and fetch initial recommendation
+  // Handle identity completion - create profile and move to SCCT assessment
   const handleIdentityComplete = useCallback(async (data: VeteranInput) => {
     setVeteranData(data);
     setVeteranName(data.name);
+    setError(null);
+
+    try {
+      // Create veteran profile
+      const veteran = await createVeteran(data);
+      setVeteranId(veteran.id);
+
+      // Store in localStorage for assessment flow
+      localStorage.setItem('veteranId', veteran.id.toString());
+      localStorage.setItem('veteranName', veteran.name);
+
+      // Move to SCCT assessment
+      setCurrentStep('scct');
+    } catch (err) {
+      console.error('Error creating profile:', err);
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    }
+  }, []);
+
+  // Handle SCCT completion - move to analysis and fetch LLM results
+  const handleSCCTComplete = useCallback(async () => {
     setCurrentStep('analysis');
     setIsLoading(true);
     setProgress(0);
@@ -49,23 +71,17 @@ export default function StartPage() {
         });
       }, 500);
 
-      // Create veteran profile
-      const veteran = await createVeteran(data);
-      setVeteranId(veteran.id);
+      // Fetch LLM-powered results
+      if (veteranId) {
+        const results = await getLLMResults(veteranId);
 
-      // Store in localStorage for assessment flow
-      localStorage.setItem('veteranId', veteran.id.toString());
-      localStorage.setItem('veteranName', veteran.name);
+        clearInterval(progressInterval);
+        setProgress(100);
 
-      // Fetch initial results (based on profile alone, before full assessment)
-      const results = await getResults(veteran.id);
-
-      clearInterval(progressInterval);
-      setProgress(100);
-
-      // Set the top recommendation
-      if (results && results.length > 0) {
-        setRecommendation(results[0]);
+        // Set the LLM results
+        if (results) {
+          setLLMResults(results);
+        }
       }
 
       setIsLoading(false);
@@ -73,19 +89,23 @@ export default function StartPage() {
       console.error('Error during analysis:', err);
       setError(err instanceof Error ? err.message : 'Something went wrong');
       setIsLoading(false);
-      // Stay on analysis screen but show error
     }
+  }, [veteranId]);
+
+  // Handle going back from SCCT
+  const handleBackFromSCCT = useCallback(() => {
+    setCurrentStep('identity');
   }, []);
 
   // Handle analysis complete - move to recommendation
   const handleAnalysisComplete = useCallback(() => {
-    if (recommendation) {
+    if (llmResults) {
       setCurrentStep('recommendation');
     } else if (error) {
       // If there was an error, go back to identity
       setCurrentStep('identity');
     }
-  }, [recommendation, error]);
+  }, [llmResults, error]);
 
   // Handle going back from identity
   const handleBackFromIdentity = useCallback(() => {
@@ -129,6 +149,14 @@ export default function StartPage() {
           />
         )}
 
+        {currentStep === 'scct' && veteranId && (
+          <SCCTQuestionScreen
+            veteranId={veteranId}
+            onComplete={handleSCCTComplete}
+            onBack={handleBackFromSCCT}
+          />
+        )}
+
         {currentStep === 'analysis' && (
           <AnalysisScreen
             veteranName={veteranName}
@@ -141,7 +169,7 @@ export default function StartPage() {
         {currentStep === 'recommendation' && (
           <RecommendationScreen
             veteranName={veteranName}
-            recommendation={recommendation}
+            llmResults={llmResults}
             onSeeAllRoles={handleSeeAllRoles}
             onStartAssessment={handleStartAssessment}
           />

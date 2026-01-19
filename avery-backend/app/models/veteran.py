@@ -15,6 +15,7 @@ class Veteran(Base):
     branch = Column(String(50), nullable=False)
     rank = Column(String(50), nullable=False)
     rating = Column(String(50), nullable=True)  # Navy rating/MOS
+    security_clearance = Column(String(50), nullable=True)  # Security clearance level
     years_of_service = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -26,6 +27,7 @@ class VeteranOnboardingStart(BaseModel):
     branch: str = Field(..., min_length=1, max_length=50)
     rank: str = Field(..., min_length=1, max_length=50)
     rating: Optional[str] = Field(None, max_length=50)
+    security_clearance: Optional[str] = Field(None, max_length=50)
     years_of_service: int = Field(..., ge=0, le=50)
 
 
@@ -36,6 +38,7 @@ class VeteranResponse(BaseModel):
     branch: str
     rank: str
     rating: Optional[str]
+    security_clearance: Optional[str]
     years_of_service: int
 
     class Config:

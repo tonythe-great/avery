@@ -7,6 +7,7 @@ export interface Veteran {
   branch: string;
   rank: string;
   rating?: string;
+  security_clearance?: string;
   years_of_service: number;
 }
 
@@ -16,6 +17,7 @@ export interface VeteranInput {
   branch: string;
   rank: string;
   rating?: string;
+  security_clearance?: string;
   years_of_service: number;
 }
 
@@ -249,6 +251,35 @@ export async function getRoadmapPreview(roleId: number): Promise<RoadmapPreview>
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.detail || "Failed to get roadmap preview");
+  }
+
+  return response.json();
+}
+
+// LLM-powered recommendations types
+export interface LLMRecommendation {
+  role_id: number;
+  role_name: string;
+  match_score: number;
+  primary_reason: string;
+  fit_factors: string[];
+  concerns: string[];
+  avery_quote: string;
+}
+
+export interface LLMResultsResponse {
+  avery_intro: string;
+  recommendations: LLMRecommendation[];
+  fallback_used: boolean;
+}
+
+// Get LLM-powered career recommendations
+export async function getLLMResults(veteranId: number): Promise<LLMResultsResponse> {
+  const response = await fetch(`${API_BASE}/results/${veteranId}/llm`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || "Failed to get LLM recommendations");
   }
 
   return response.json();

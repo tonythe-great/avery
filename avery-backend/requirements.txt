@@ -5,3 +5,4 @@ sqlalchemy
 python-dotenv
 pydantic-settings
 aiosqlite
+anthropic>=0.18.0

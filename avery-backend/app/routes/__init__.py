@@ -1,2 +1,2 @@
 # Routes package
-from app.routes import onboarding, assessment, results
+from app.routes import onboarding, assessment, results, scct
